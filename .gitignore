@@ -68,3 +68,8 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 .certs/
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
