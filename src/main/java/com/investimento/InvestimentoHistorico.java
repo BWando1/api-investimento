@@ -12,12 +12,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "investimento")
-public class Investimento extends PanacheEntity {
+@Table(name = "investimento_historico")
+public class InvestimentoHistorico extends PanacheEntity {
 
-    @NotBlank
-    @Column(nullable = false)
-    public String nome;
+    @NotNull
+    @Column(nullable = false, name = "cliente_id")
+    public Long clienteId;
 
     @NotBlank
     @Column(nullable = false)
@@ -29,6 +29,11 @@ public class Investimento extends PanacheEntity {
     public BigDecimal valor;
 
     @NotNull
-    @Column(nullable = false, name = "data_aplicacao")
-    public LocalDate dataAplicacao;
+    @DecimalMin("0.000001")
+    @Column(nullable = false)
+    public BigDecimal rentabilidade;
+
+    @NotNull
+    @Column(nullable = false)
+    public LocalDate data;
 }

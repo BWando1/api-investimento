@@ -34,24 +34,7 @@ The API will be available at http://localhost:8080
 
 ## REST Endpoints
 
-| Method | Path                  | Description              |
-|--------|-----------------------|--------------------------|
-| GET    | /investimentos        | List all investments     |
-| GET    | /investimentos/{id}   | Get investment by ID     |
-| POST   | /investimentos        | Create a new investment  |
-| PUT    | /investimentos/{id}   | Update an investment     |
-| DELETE | /investimentos/{id}   | Delete an investment     |
-
-### Example payload
-
-```json
-{
-  "nome": "Tesouro Direto",
-  "tipo": "Renda Fixa",
-  "valor": 1000.00,
-  "dataAplicacao": "2024-01-15"
-}
-```
+The challenge endpoints are being implemented in the next step based on `desafio.md`.
 
 ## Running Tests
 
