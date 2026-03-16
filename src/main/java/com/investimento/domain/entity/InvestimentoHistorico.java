@@ -1,8 +1,11 @@
-package com.investimento;
+package com.investimento.domain.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +21,10 @@ public class InvestimentoHistorico extends PanacheEntity {
     @NotNull
     @Column(nullable = false, name = "cliente_id")
     public Long clienteId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "produto_id")
+    public Produto produto;
 
     @NotBlank
     @Column(nullable = false)
