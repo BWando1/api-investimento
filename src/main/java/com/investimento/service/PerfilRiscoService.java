@@ -1,7 +1,8 @@
 package com.investimento.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import com.investimento.api.dto.PerfilRiscoResponse;
 
-@ApplicationScoped
-public class PerfilRiscoService {
+public interface PerfilRiscoService {
+
+    PerfilRiscoResponse calcularPerfil(Long clienteId);
 }

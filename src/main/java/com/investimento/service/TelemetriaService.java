@@ -1,7 +1,10 @@
 package com.investimento.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import com.investimento.api.dto.TelemetriaResponse;
 
-@ApplicationScoped
-public class TelemetriaService {
+public interface TelemetriaService {
+
+    TelemetriaResponse obterTelemetria();
+
+    void registrarChamada(String nomeServico, long tempoRespostaMs);
 }
