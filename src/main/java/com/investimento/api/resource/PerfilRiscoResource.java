@@ -25,7 +25,7 @@ public class PerfilRiscoResource {
     @Path("/{clienteId}")
     @Operation(
             summary = "Calcular perfil de risco",
-            description = "Calcula o perfil de risco dinâmico do cliente com base no histórico de investimentos dos últimos 12 meses."
+            description = "Calcula o perfil de risco dinâmico do cliente com base em todo o histórico de investimentos."
     )
     public Response calcularPerfil(@PathParam("clienteId") Long clienteId) {
         PerfilRiscoResponse resultado = perfilRiscoService.calcularPerfil(clienteId);

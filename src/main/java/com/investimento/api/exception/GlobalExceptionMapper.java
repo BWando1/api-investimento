@@ -5,12 +5,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
 public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
 
-    private static final Logger LOG = Logger.getLogger(GlobalExceptionMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionMapper.class);
 
     @Override
     public Response toResponse(Exception e) {
@@ -22,7 +23,7 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
                     .build();
         }
 
-        LOG.error("Unexpected error", e);
+        LOG.error("event=unexpected_error exceptionType={} message={}", e.getClass().getSimpleName(), e.getMessage(), e);
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON)

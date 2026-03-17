@@ -8,26 +8,29 @@ import com.investimento.repository.InvestimentoHistoricoRepository;
 import com.investimento.service.PerfilRiscoService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @ApplicationScoped
 public class PerfilRiscoServiceImpl implements PerfilRiscoService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PerfilRiscoServiceImpl.class);
 
     @Inject
     InvestimentoHistoricoRepository investimentoHistoricoRepository;
 
     @Override
     public PerfilRiscoResponse calcularPerfil(Long clienteId) {
-        LocalDate dozesMesesAtras = LocalDate.now().minusMonths(12);
-        List<InvestimentoHistorico> historicos =
-                investimentoHistoricoRepository.findByClienteIdSince(clienteId, dozesMesesAtras);
+        LOG.info("event=perfil_risco_calculo_inicio clienteId={}", clienteId);
+        List<InvestimentoHistorico> historicos = investimentoHistoricoRepository.findByClienteId(clienteId);
 
         if (historicos.isEmpty()) {
+            LOG.warn("event=perfil_risco_sem_historico clienteId={}", clienteId);
             throw new ResourceNotFoundException(
-                    "Nenhum histórico de investimentos encontrado para o cliente " + clienteId + " nos últimos 12 meses.");
+                "Nenhum histórico de investimentos encontrado para o cliente " + clienteId + ".");
         }
 
         int volumeScore = calcularVolumeScore(historicos);
@@ -39,13 +42,23 @@ public class PerfilRiscoServiceImpl implements PerfilRiscoService {
         PerfilRiscoTipo perfil = classificarPerfil(pontuacaoTotal);
         String descricao = gerarDescricao(perfil, pontuacaoTotal, volumeScore, frequenciaScore, preferenciaScore);
 
+        LOG.info(
+            "event=perfil_risco_calculo_fim clienteId={} perfil={} pontuacao={} volumeScore={} frequenciaScore={} preferenciaScore={} historicoCount={}",
+            clienteId,
+            perfil,
+            pontuacaoTotal,
+            volumeScore,
+            frequenciaScore,
+            preferenciaScore,
+            historicos.size());
+
         return new PerfilRiscoResponse(clienteId, perfil.name(), pontuacaoTotal, descricao);
     }
 
     // --- Score components ---
 
     /**
-     * Volume score (0–40): based on total invested amount in the last 12 months.
+        * Volume score (0–40): based on total invested amount.
      * < R$10k      → 10
      * R$10k–50k    → 20
      * R$50k–150k   → 30
@@ -63,7 +76,7 @@ public class PerfilRiscoServiceImpl implements PerfilRiscoService {
     }
 
     /**
-     * Frequency score (0–30): based on number of investment records in the last 12 months.
+        * Frequency score (0–30): based on number of investment records.
      * ≤ 2          → 8
      * 3–6          → 15
      * 7–12         → 24
