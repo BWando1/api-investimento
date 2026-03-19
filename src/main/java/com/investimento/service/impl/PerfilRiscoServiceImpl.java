@@ -8,51 +8,49 @@ import com.investimento.repository.InvestimentoHistoricoRepository;
 import com.investimento.service.PerfilRiscoService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @ApplicationScoped
+@Slf4j
 public class PerfilRiscoServiceImpl implements PerfilRiscoService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(PerfilRiscoServiceImpl.class);
 
     @Inject
     InvestimentoHistoricoRepository investimentoHistoricoRepository;
 
     @Override
     public PerfilRiscoResponse calcularPerfil(Long clienteId) {
-        LOG.info("event=perfil_risco_calculo_inicio clienteId={}", clienteId);
         List<InvestimentoHistorico> historicos = investimentoHistoricoRepository.findByClienteId(clienteId);
 
         if (historicos.isEmpty()) {
-            LOG.warn("event=perfil_risco_sem_historico clienteId={}", clienteId);
+            log.warn("Sem historico de investimentos para clienteId={}", clienteId);
             throw new ResourceNotFoundException(
                 "Nenhum histórico de investimentos encontrado para o cliente " + clienteId + ".");
         }
 
-        int volumeScore = calcularVolumeScore(historicos);
-        int frequenciaScore = calcularFrequenciaScore(historicos);
-        int preferenciaScore = calcularPreferenciaScore(historicos);
+        ScoreBreakdown score = calcularScore(historicos);
 
-        int pontuacaoTotal = volumeScore + frequenciaScore + preferenciaScore;
+        PerfilRiscoTipo perfil = classificarPerfil(score.total());
+        String descricao = gerarDescricao(perfil, score.total(), score.volume(), score.frequencia(), score.preferencia());
 
-        PerfilRiscoTipo perfil = classificarPerfil(pontuacaoTotal);
-        String descricao = gerarDescricao(perfil, pontuacaoTotal, volumeScore, frequenciaScore, preferenciaScore);
+        log.info("Perfil calculado clienteId={} perfil={} pontuacao={}", clienteId, perfil, score.total());
 
-        LOG.info(
-            "event=perfil_risco_calculo_fim clienteId={} perfil={} pontuacao={} volumeScore={} frequenciaScore={} preferenciaScore={} historicoCount={}",
-            clienteId,
-            perfil,
-            pontuacaoTotal,
-            volumeScore,
-            frequenciaScore,
-            preferenciaScore,
-            historicos.size());
+        return new PerfilRiscoResponse(clienteId, perfil.name(), score.total(), descricao);
+    }
 
-        return new PerfilRiscoResponse(clienteId, perfil.name(), pontuacaoTotal, descricao);
+    private ScoreBreakdown calcularScore(List<InvestimentoHistorico> historicos) {
+        int volume = calcularVolumeScore(historicos);
+        int frequencia = calcularFrequenciaScore(historicos);
+        int preferencia = calcularPreferenciaScore(historicos);
+        return new ScoreBreakdown(volume, frequencia, preferencia);
+    }
+
+    private record ScoreBreakdown(int volume, int frequencia, int preferencia) {
+        int total() {
+            return volume + frequencia + preferencia;
+        }
     }
 
     // --- Score components ---
