@@ -25,7 +25,6 @@ public class PerfilRiscoServiceImpl implements PerfilRiscoService {
         List<InvestimentoHistorico> historicos = investimentoHistoricoRepository.findByClienteId(clienteId);
 
         if (historicos.isEmpty()) {
-            log.warn("Sem historico de investimentos para clienteId={}", clienteId);
             throw new ResourceNotFoundException(
                 "Nenhum histórico de investimentos encontrado para o cliente " + clienteId + ".");
         }
