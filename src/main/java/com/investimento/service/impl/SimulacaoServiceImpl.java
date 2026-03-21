@@ -2,6 +2,7 @@ package com.investimento.service.impl;
 
 import com.investimento.api.dto.PageResponse;
 import com.investimento.api.dto.ProdutoResumoResponse;
+import com.investimento.api.dto.ResultadoSimulacaoResponse;
 import com.investimento.api.dto.SimularInvestimentoRequest;
 import com.investimento.api.dto.SimularInvestimentoResponse;
 import com.investimento.api.dto.SimulacaoHistoricoResponse;
@@ -19,13 +20,8 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class SimulacaoServiceImpl implements SimulacaoService {
@@ -42,7 +38,34 @@ public class SimulacaoServiceImpl implements SimulacaoService {
     @Override
     @Transactional
     public SimularInvestimentoResponse simular(SimularInvestimentoRequest request) {
-       
+
+        Produto produto = produtoService.selecionarProdutoElegivel(request);
+        
+        ResultadoSimulacaoResponse calculo = calculoInvestimentoService
+                .calcular(request.valor(), request.prazoMeses(), produto.rentabilidade);
+
+        
+        OffsetDateTime agora = OffsetDateTime.now();
+        Simulacao simulacao = new Simulacao();
+        simulacao.clienteId = request.clienteId();
+        simulacao.produtoNome = produto.nome;
+        simulacao.valorInvestido = request.valor();
+        simulacao.valorFinal = calculo.valorFinal();
+        simulacao.prazoMeses = request.prazoMeses();
+        simulacao.dataSimulacao = agora;
+
+        
+        simulacaoRepository.persist(simulacao);
+
+        ProdutoResumoResponse produtoResumo = new ProdutoResumoResponse(
+                produto.id,
+                produto.nome,
+                produto.tipo,
+                produto.rentabilidade,
+                produto.risco
+        );
+
+        return new SimularInvestimentoResponse(produtoResumo, calculo, agora);
     }
 
     @Override
@@ -69,35 +92,8 @@ public class SimulacaoServiceImpl implements SimulacaoService {
 
     @Override
     public List<SimulacaoPorProdutoDiaResponse> listarPorProdutoDia() {
-        List<Simulacao> simulacoes = simulacaoRepository.listAll();
-
-        record ChaveAgrupamento(String produto, LocalDate data) {}
-
-        Map<ChaveAgrupamento, List<Simulacao>> agrupado = simulacoes.stream()
-                .collect(Collectors.groupingBy(s -> new ChaveAgrupamento(s.produtoNome, s.dataSimulacao.toLocalDate())));
-
-        return agrupado.entrySet().stream()
-                .map(entry -> {
-                    ChaveAgrupamento chave = entry.getKey();
-                    List<Simulacao> itens = entry.getValue();
-
-                    BigDecimal soma = itens.stream()
-                            .map(s -> s.valorFinal)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                    BigDecimal media = soma
-                            .divide(BigDecimal.valueOf(itens.size()), 2, RoundingMode.HALF_UP);
-
-                    return new SimulacaoPorProdutoDiaResponse(
-                            chave.produto(),
-                            chave.data(),
-                            (long) itens.size(),
-                            media
-                    );
-                })
-                .sorted(Comparator
-                        .comparing(SimulacaoPorProdutoDiaResponse::data).reversed()
-                        .thenComparing(SimulacaoPorProdutoDiaResponse::produto))
-                .toList();
+        // Query delegada ao banco com GROUP BY + agregações (COUNT, AVG)
+        // Muito mais eficiente do que carregar todos os dados em memória
+        return simulacaoRepository.listarAgregadoPorProdutoDia();
     }
 }
