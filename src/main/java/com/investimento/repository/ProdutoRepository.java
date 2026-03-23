@@ -18,4 +18,8 @@ public class ProdutoRepository implements PanacheRepositoryBase<Produto, Long> {
 				prazoMeses
 		);
 	}
+
+	public List<Produto> buscarRecomendadosPorRiscos(List<String> riscos) {
+		return list("ativo = true AND risco in ?1 ORDER BY rentabilidade DESC", riscos);
+	}
 }

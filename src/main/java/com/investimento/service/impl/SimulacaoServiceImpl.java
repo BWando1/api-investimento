@@ -48,9 +48,12 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         OffsetDateTime agora = OffsetDateTime.now();
         Simulacao simulacao = new Simulacao();
         simulacao.clienteId = request.clienteId();
+        simulacao.produto = produto;
         simulacao.produtoNome = produto.nome;
+        simulacao.tipoProduto = produto.tipo;
         simulacao.valorInvestido = request.valor();
         simulacao.valorFinal = calculo.valorFinal();
+        simulacao.rentabilidadeEfetiva = calculo.rentabilidadeEfetiva();
         simulacao.prazoMeses = request.prazoMeses();
         simulacao.dataSimulacao = agora;
 

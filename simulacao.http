@@ -31,6 +31,30 @@ GET http://localhost:8080/simular-investimento/historico?page=1&pageSize=10
 ### GET Agregado por Produto e Dia
 GET http://localhost:8080/simular-investimento/por-produto-dia
 
+### GET Simulacoes (endpoint padrao do desafio) - pagina 0
+GET http://localhost:8080/simulacoes?page=0&pageSize=10
+
+### GET Simulacoes por Produto e Dia (endpoint padrao do desafio)
+GET http://localhost:8080/simulacoes/por-produto-dia
+
+### GET Perfil de Risco
+GET http://localhost:8080/perfil-risco/999
+
+### GET Produtos Recomendados - CONSERVADOR
+GET http://localhost:8080/produtos-recomendados/conservador
+
+### GET Produtos Recomendados - MODERADO
+GET http://localhost:8080/produtos-recomendados/moderado
+
+### GET Produtos Recomendados - AGRESSIVO
+GET http://localhost:8080/produtos-recomendados/agressivo
+
+### GET Historico de Investimentos do Cliente
+GET http://localhost:8080/investimentos/999
+
+### GET Telemetria
+GET http://localhost:8080/telemetria
+
 ### GET Health Check (aplicacao rodando)
 GET http://localhost:8080/q/health
 
