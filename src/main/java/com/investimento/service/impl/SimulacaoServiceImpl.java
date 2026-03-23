@@ -92,8 +92,6 @@ public class SimulacaoServiceImpl implements SimulacaoService {
 
     @Override
     public List<SimulacaoPorProdutoDiaResponse> listarPorProdutoDia() {
-        // Query delegada ao banco com GROUP BY + agregações (COUNT, AVG)
-        // Muito mais eficiente do que carregar todos os dados em memória
         return simulacaoRepository.listarAgregadoPorProdutoDia();
     }
 }

@@ -1,0 +1,38 @@
+### Test Simulacao Endpoint
+
+### POST Criar Simulacao - Renda Fixa (compatível com contrato atual)
+POST http://localhost:8080/simular-investimento
+Content-Type: application/json
+
+{
+  "clienteId": 999,
+  "valor": 10000.00,
+  "prazoMeses": 12,
+  "tipoProduto": "RENDA_FIXA"
+}
+
+### POST Criar Simulacao - Multimercado
+POST http://localhost:8080/simular-investimento
+Content-Type: application/json
+
+{
+  "clienteId": 999,
+  "valor": 25000.00,
+  "prazoMeses": 24,
+  "tipoProduto": "MULTIMERCADO"
+}
+
+### GET Historico de Simulacoes - pagina 0
+GET http://localhost:8080/simular-investimento/historico?page=0&pageSize=10
+
+### GET Historico de Simulacoes - pagina 1
+GET http://localhost:8080/simular-investimento/historico?page=1&pageSize=10
+
+### GET Agregado por Produto e Dia
+GET http://localhost:8080/simular-investimento/por-produto-dia
+
+### GET Health Check (aplicacao rodando)
+GET http://localhost:8080/q/health
+
+### GET OpenAPI (documentacao)
+GET http://localhost:8080/q/openapi
