@@ -1,7 +1,9 @@
 package com.investimento.domain.entity;
 
+import com.investimento.domain.converter.OffsetDateTimeStringConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
@@ -29,6 +31,7 @@ public class TelemetriaServico extends PanacheEntity {
     public Long tempoTotalRespostaMs;
 
     @NotNull
+    @Convert(converter = OffsetDateTimeStringConverter.class)
     @Column(nullable = false, name = "ultima_atualizacao")
     public OffsetDateTime ultimaAtualizacao;
 }

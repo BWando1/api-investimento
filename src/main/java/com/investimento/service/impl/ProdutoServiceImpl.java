@@ -30,6 +30,6 @@ public class ProdutoServiceImpl implements ProdutoService {
                             "', valor " + request.valor() + " e prazo " + request.prazoMeses() + " meses.");
         }
 
-        return elegiveis.getFirst();
+        return elegiveis.get(0);
     }
 }

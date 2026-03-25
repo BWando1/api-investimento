@@ -49,9 +49,6 @@ GET http://localhost:8080/produtos-recomendados/moderado
 ### GET Produtos Recomendados - AGRESSIVO
 GET http://localhost:8080/produtos-recomendados/agressivo
 
-### GET Historico de Investimentos do Cliente
-GET http://localhost:8080/investimentos/999
-
 ### GET Telemetria
 GET http://localhost:8080/telemetria
 

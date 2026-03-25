@@ -1,7 +1,9 @@
 package com.investimento.domain.entity;
 
+import com.investimento.domain.converter.OffsetDateTimeStringConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -57,6 +59,7 @@ public class Simulacao extends PanacheEntity {
     public Integer prazoMeses;
 
     @NotNull
+    @Convert(converter = OffsetDateTimeStringConverter.class)
     @Column(nullable = false, name = "data_simulacao")
     public OffsetDateTime dataSimulacao;
 }
