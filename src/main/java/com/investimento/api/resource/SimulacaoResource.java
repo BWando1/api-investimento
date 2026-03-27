@@ -7,6 +7,7 @@ import com.investimento.api.dto.SimularInvestimentoResponse;
 import com.investimento.api.dto.SimulacaoHistoricoResponse;
 import com.investimento.api.dto.SimulacaoPorProdutoDiaResponse;
 import com.investimento.service.SimulacaoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -30,9 +31,14 @@ import java.util.List;
 public class SimulacaoResource {
 
     @Inject
+
+
+
+
     SimulacaoService simulacaoService;
 
     @POST
+        @RolesAllowed({"usuario", "admin"})
     @Operation(
             summary = "Simular investimento",
             description = "Seleciona um produto elegivel, calcula o retorno estimado e persiste a simulacao."
@@ -44,6 +50,7 @@ public class SimulacaoResource {
 
     @GET
     @Path("/historico")
+        @RolesAllowed("admin")
     @Operation(
             summary = "Listar historico de simulacoes",
             description = "Retorna historico paginado das simulacoes realizadas, ordenado por data decrescente."
@@ -58,6 +65,7 @@ public class SimulacaoResource {
 
     @GET
     @Path("/por-produto-dia")
+        @RolesAllowed("admin")
     @Operation(
             summary = "Listar agregado por produto e dia",
             description = "Retorna quantidade de simulacoes e media do valor final agrupadas por produto e dia."
