@@ -22,7 +22,7 @@ public class TelemetriaResource {
     TelemetriaService telemetriaService;
 
     @GET
-        @RolesAllowed("admin")
+        @RolesAllowed("analista")
     @Operation(
             summary = "Obter dados de telemetria",
             description = "Retorna volume de chamadas e tempo medio de resposta por servico."

@@ -3,6 +3,7 @@ package com.investimento.api.resource;
 import com.investimento.api.dto.ApiResponse;
 import com.investimento.api.dto.ProdutoResumoResponse;
 import com.investimento.service.ProdutoRecomendadoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -25,6 +26,7 @@ public class ProdutosRecomendadosResource {
 
     @GET
     @Path("/{perfil}")
+        @RolesAllowed({"usuario", "analista"})
     @Operation(
             summary = "Listar produtos recomendados",
             description = "Retorna produtos ativos recomendados para um perfil de risco."

@@ -1,15 +1,35 @@
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: investimentos-keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - ./docker/keycloak/realm-investimentos.json:/opt/keycloak/data/import/realm-investimentos.json:ro
+    ports:
+      - "8180:8080"
+
   api-investimento:
     build:
       context: .
       dockerfile: src/main/docker/Dockerfile.jvm
     image: quarkus/api-investimento-jvm
+    container_name: api-investimento
+    depends_on:
+      - keycloak
     ports:
       - "8080:8080"
-    volumes:
-      - investimento-data:/data
     environment:
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/data/investimento.db
-
-volumes:
-  investimento-data:
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/tmp/investimento.db
+      - QUARKUS_DATASOURCE_JDBC_MIN_SIZE=1
+      - QUARKUS_DATASOURCE_JDBC_MAX_SIZE=1
+      - OIDC_AUTH_SERVER_URL=http://keycloak:8080/realms/investimentos
+      - QUARKUS_OIDC_TOKEN_ISSUER=http://keycloak:8180/realms/investimentos
+      - OIDC_CLIENT_ID=api-investimento
+      - OIDC_CLIENT_SECRET=api-secret

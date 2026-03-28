@@ -5,6 +5,7 @@ import com.investimento.api.dto.PageResponse;
 import com.investimento.api.dto.SimulacaoHistoricoResponse;
 import com.investimento.api.dto.SimulacaoPorProdutoDiaResponse;
 import com.investimento.service.SimulacaoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -27,6 +28,7 @@ public class SimulacoesResource {
     SimulacaoService simulacaoService;
 
     @GET
+        @RolesAllowed("analista")
     @Operation(
             summary = "Listar simulacoes realizadas",
             description = "Retorna historico paginado das simulacoes realizadas."
@@ -41,6 +43,7 @@ public class SimulacoesResource {
 
     @GET
     @Path("/por-produto-dia")
+        @RolesAllowed("analista")
     @Operation(
             summary = "Listar agregado por produto e dia",
             description = "Retorna quantidade e media de valor final por produto em cada dia."

@@ -105,7 +105,7 @@ class SimulacaoServiceImplTest {
 
         assertEquals(1L, page.totalElements());
         assertEquals(1, page.content().size());
-        assertEquals("CDB Caixa 2026", page.content().getFirst().produto());
+        assertEquals("CDB Caixa 2026", page.content().get(0).produto());
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.investimento.api.resource;
 import com.investimento.api.dto.ApiResponse;
 import com.investimento.api.dto.PerfilRiscoResponse;
 import com.investimento.service.PerfilRiscoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -23,6 +24,7 @@ public class PerfilRiscoResource {
 
     @GET
     @Path("/{clienteId}")
+        @RolesAllowed({"usuario", "analista"})
     @Operation(
             summary = "Calcular perfil de risco",
             description = "Calcula o perfil de risco dinâmico do cliente com base em todo o histórico de investimentos."

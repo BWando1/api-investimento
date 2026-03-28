@@ -40,7 +40,7 @@ class ProdutoRecomendadoServiceImplTest {
         verify(repository).buscarRecomendadosPorRiscos(captor.capture());
         assertEquals(List.of("Baixo", "Medio"), captor.getValue());
         assertEquals(1, result.size());
-        assertEquals("CDB Caixa 2026", result.getFirst().nome());
+        assertEquals("CDB Caixa 2026", result.get(0).nome());
     }
 
     @Test

@@ -7,10 +7,12 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
+import org.jboss.logging.Logger;
 
 @Provider
 public class TelemetriaFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
+    private static final Logger LOG = Logger.getLogger(TelemetriaFilter.class);
     private static final String START_TIME_PROP = "telemetria.start.nano";
 
     @Inject
@@ -35,6 +37,11 @@ public class TelemetriaFilter implements ContainerRequestFilter, ContainerRespon
 
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000L;
         String nomeServico = requestContext.getMethod() + " /" + path;
-        telemetriaService.registrarChamada(nomeServico, elapsedMs);
+        try {
+            telemetriaService.registrarChamada(nomeServico, elapsedMs);
+        } catch (Exception ex) {
+            // Telemetry is non-critical: do not break endpoint response due to metrics persistence issues.
+            LOG.warnf("Falha ao registrar telemetria para %s: %s", nomeServico, ex.getMessage());
+        }
     }
 }

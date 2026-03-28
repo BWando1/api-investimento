@@ -39,7 +39,7 @@ class TelemetriaServiceImplTest {
         TelemetriaResponse response = service.obterTelemetria();
 
         assertEquals(1, response.servicos().size());
-        assertEquals(50L, response.servicos().getFirst().mediaTempoRespostaMs());
+        assertEquals(50L, response.servicos().get(0).mediaTempoRespostaMs());
         assertEquals(now.minusDays(1).toLocalDate(), response.periodo().inicio());
         assertEquals(now.toLocalDate(), response.periodo().fim());
     }
