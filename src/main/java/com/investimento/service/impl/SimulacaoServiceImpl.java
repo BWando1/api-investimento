@@ -17,7 +17,6 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -35,8 +34,10 @@ public class SimulacaoServiceImpl implements SimulacaoService {
     @Inject
     SimulacaoRepository simulacaoRepository;
 
+    @Inject
+    SimulacaoPersistenceService simulacaoPersistenceService;
+
     @Override
-    @Transactional
     public SimularInvestimentoResponse simular(SimularInvestimentoRequest request) {
 
         Produto produto = produtoService.selecionarProdutoElegivel(request);
@@ -57,8 +58,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         simulacao.prazoMeses = request.prazoMeses();
         simulacao.dataSimulacao = agora;
 
-        
-        simulacaoRepository.persist(simulacao);
+        simulacaoPersistenceService.salvar(simulacao, produto.id);
 
         ProdutoResumoResponse produtoResumo = new ProdutoResumoResponse(
                 produto.id,

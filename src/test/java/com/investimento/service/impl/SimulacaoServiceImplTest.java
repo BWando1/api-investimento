@@ -36,6 +36,7 @@ class SimulacaoServiceImplTest {
         ProdutoService produtoService = mock(ProdutoService.class);
         CalculoInvestimentoService calculoService = mock(CalculoInvestimentoService.class);
         SimulacaoRepository repository = mock(SimulacaoRepository.class);
+        SimulacaoPersistenceService persistenceService = mock(SimulacaoPersistenceService.class);
 
         Produto produto = new Produto();
         produto.id = 101L;
@@ -64,11 +65,12 @@ class SimulacaoServiceImplTest {
         inject(service, "produtoService", produtoService);
         inject(service, "calculoInvestimentoService", calculoService);
         inject(service, "simulacaoRepository", repository);
+        inject(service, "simulacaoPersistenceService", persistenceService);
 
         SimularInvestimentoResponse response = service.simular(request);
 
         ArgumentCaptor<Simulacao> captor = ArgumentCaptor.forClass(Simulacao.class);
-        verify(repository).persist(captor.capture());
+        verify(persistenceService).salvar(captor.capture(), eq(101L));
         Simulacao persisted = captor.getValue();
 
         assertEquals(999L, persisted.clienteId);

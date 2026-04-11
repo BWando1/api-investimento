@@ -26,7 +26,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/tmp/investimento.db
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/tmp/investimento.db?busy_timeout=5000&journal_mode=WAL
       - QUARKUS_DATASOURCE_JDBC_MIN_SIZE=2
       - QUARKUS_DATASOURCE_JDBC_MAX_SIZE=5
       - OIDC_AUTH_SERVER_URL=http://keycloak:8080/realms/investimentos
