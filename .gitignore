@@ -1,16 +1,19 @@
-# Compiled class file
+##############################################################################
+# Java / Maven / Quarkus
+##############################################################################
+
+# Compiled class files
 *.class
 
-# Log file
-*.log
+# Maven build directory
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+.flattened-pom.xml
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,17 +22,29 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# JVM crash logs
 hs_err_pid*
 replay_pid*
 
-# Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-release.properties
-.flattened-pom.xml
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# BlueJ files
+*.ctxt
+
+# Quarkus
+/.quarkus/cli/plugins/
+.certs/
+
+##############################################################################
+# IDE / Editor
+##############################################################################
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iml
+*.iws
 
 # Eclipse
 .project
@@ -37,39 +52,115 @@ release.properties
 .settings/
 bin/
 
-# IntelliJ
-.idea
-*.ipr
-*.iml
-*.iws
-
 # NetBeans
 nb-configuration.xml
 
 # Visual Studio Code
-.vscode
+.vscode/
 .factorypath
-
-# OSX
-.DS_Store
 
 # Vim
 *.swp
 *.swo
+*~
 
-# patch
-*.orig
-*.rej
+# Emacs
+\#*\#
+.\#*
 
-# Local environment
-.env
+# Claude Code (AI assistant local config)
+.claude/
 
-# Quarkus
-/.quarkus/cli/plugins/
-.certs/
+##############################################################################
+# OS Files
+##############################################################################
 
-# SQLite database files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+##############################################################################
+# Logs & Databases
+##############################################################################
+
+# Log files
+*.log
+logs/
+
+# SQLite database files (local dev only)
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
+*.sqlite3
+
+##############################################################################
+# Test Coverage & Reports
+##############################################################################
+
+# JaCoCo
+jacoco.exec
+*.exec
+/site/
+
+# Surefire/Failsafe reports
+surefire-reports/
+failsafe-reports/
+
+##############################################################################
+# Environment & Secrets
+##############################################################################
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Credentials
+credentials.json
+*.pem
+*.key
+*.crt
+
+##############################################################################
+# Docker & Temporary
+##############################################################################
+
+# Docker volumes & data
+/data/
+/volumes/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Patch files
+*.orig
+*.rej
+
+##############################################################################
+# Documents (keep only essential docs like README.md in repo)
+##############################################################################
+
+# Office documents (use docs/ folder if needed, but track intentionally)
+*.docx
+*.xlsx
+*.pptx
+*.pdf
+
+# Exceptions: keep these if present (add with git add -f if needed)
+# !docs/architecture.pdf
+# !README.pdf
 

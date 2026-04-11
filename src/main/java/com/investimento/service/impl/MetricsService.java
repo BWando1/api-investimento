@@ -2,6 +2,7 @@ package com.investimento.service.impl;
 
 import com.investimento.entity.RequestMetric;
 import com.investimento.repository.RequestMetricRepository;
+import com.investimento.service.TelemetriaService;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -32,6 +33,9 @@ public class MetricsService {
 
     @Inject
     RequestMetricRepository requestMetricRepository;
+
+    @Inject
+    TelemetriaService telemetriaService;
 
     /**
      * Enfileira uma métrica para persistência posterior.
@@ -67,6 +71,9 @@ public class MetricsService {
 
         if (!batch.isEmpty()) {
             requestMetricRepository.salvar(batch);
+            for (RequestMetric metric : batch) {
+                telemetriaService.registrarChamada(metric.getServico(), metric.getTempoRespostaMs());
+            }
         }
     }
 }

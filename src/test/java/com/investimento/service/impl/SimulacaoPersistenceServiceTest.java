@@ -35,7 +35,7 @@ class SimulacaoPersistenceServiceTest {
         simulacao.prazoMeses = 12;
         simulacao.dataSimulacao = OffsetDateTime.now();
 
-        when(produtoRepository.getReferenceById(101L)).thenReturn(produto);
+        when(produtoRepository.findById(101L)).thenReturn(produto);
 
         SimulacaoPersistenceService service = new SimulacaoPersistenceService();
         inject(service, "produtoRepository", produtoRepository);

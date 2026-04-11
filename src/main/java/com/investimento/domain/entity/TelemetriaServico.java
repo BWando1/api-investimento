@@ -1,10 +1,13 @@
 package com.investimento.domain.entity;
 
 import com.investimento.domain.converter.OffsetDateTimeStringConverter;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +17,11 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "telemetria_servico")
-public class TelemetriaServico extends PanacheEntity {
+public class TelemetriaServico extends PanacheEntityBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     @NotBlank
     @Column(nullable = false, name = "nome_servico", unique = true)

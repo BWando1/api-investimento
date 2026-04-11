@@ -19,7 +19,7 @@ public class SimulacaoPersistenceService {
 
     @Transactional
     public void salvar(Simulacao simulacao, Long produtoId) {
-        Produto produto = produtoRepository.getReferenceById(produtoId);
+        Produto produto = produtoRepository.findById(produtoId);
         simulacao.produto = produto;
         simulacaoRepository.persist(simulacao);
     }
