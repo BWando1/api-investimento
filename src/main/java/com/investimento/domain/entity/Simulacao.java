@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -69,4 +70,9 @@ public class Simulacao extends PanacheEntityBase {
     @Convert(converter = OffsetDateTimeStringConverter.class)
     @Column(nullable = false, name = "data_simulacao")
     public OffsetDateTime dataSimulacao;
+
+    @NotNull
+    @Convert(converter = com.investimento.domain.converter.LocalDateStringConverter.class)
+    @Column(nullable = false, name = "data_simulacao_date")
+    public LocalDate dataSimulacaoDate;
 }

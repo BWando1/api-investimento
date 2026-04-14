@@ -1,104 +1,191 @@
-# api-investimento
+# API de Investimentos — Desafio CAIXA
 
-A Quarkus REST API for managing investments, using SQLite as the database.
+API REST para simulação de investimentos com perfil de risco dinâmico, recomendação de produtos e telemetria.
 
-## Technologies
+## Stack
 
-- [Quarkus 3.x](https://quarkus.io/)
-- SQLite (via `org.xerial:sqlite-jdbc`)
-- Hibernate ORM with Panache
-- RESTEasy Reactive (JAX-RS)
-- SmallRye OpenAPI / Swagger UI
-- Docker / Docker Compose
+| Camada | Tecnologia |
+|---|---|
+| Runtime | Java 21 + Quarkus 3.18.4 |
+| Persistência | SQLite + Hibernate ORM/Panache + Flyway |
+| Segurança | Keycloak 26 (OIDC/JWT) |
+| Testes | JUnit 5 + RestAssured + Mockito |
+| Infraestrutura | Docker + Docker Compose |
+| Documentação | SmallRye OpenAPI + Swagger UI |
 
-## Running in Development Mode
+---
+
+## Executando com Docker (recomendado)
+
+```bash
+# 1. Gerar o JAR
+./mvnw package -DskipTests
+
+# 2. Subir API + Keycloak
+docker compose up --build
+```
+
+| Serviço | URL |
+|---|---|
+| API | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/q/swagger-ui |
+| Keycloak Admin | http://localhost:8180 (admin / admin) |
+
+> Para autenticar e obter o token JWT, consulte [SECURITY.md](SECURITY.md).
+
+---
+
+## Executando em modo desenvolvimento
 
 ```bash
 ./mvnw quarkus:dev
 ```
 
-The API will be available at http://localhost:8080  
-Swagger UI: http://localhost:8080/q/swagger-ui
+Em `dev`, a autenticação OIDC é desabilitada automaticamente pelo profile de teste.
+A API sobe em http://localhost:8080.
 
-## Building and Running with Docker
+---
+
+## Endpoints
+
+### Simulação
+
+| Método | Endpoint | Papel | Descrição |
+|---|---|---|---|
+| `POST` | `/simular-investimento` | usuario, analista | Simula investimento e persiste resultado |
+| `GET` | `/simulacoes` | analista | Histórico paginado de simulações |
+| `GET` | `/simulacoes/por-produto-dia` | analista | Quantidade e média por produto/dia |
+
+### Perfil de Risco e Produtos
+
+| Método | Endpoint | Papel | Descrição |
+|---|---|---|---|
+| `GET` | `/perfil-risco/{clienteId}` | usuario, analista | Calcula perfil dinâmico por histórico |
+| `GET` | `/produtos-recomendados/{perfil}` | usuario, analista | Lista produtos adequados ao perfil |
+| `GET` | `/investimentos/{clienteId}` | usuario, analista | Histórico de investimentos do cliente |
+
+### Observabilidade
+
+| Método | Endpoint | Papel | Descrição |
+|---|---|---|---|
+| `GET` | `/telemetria` | analista | Volume de chamadas e tempo médio por serviço |
+
+---
+
+## Exemplo de Simulação
 
 ```bash
-# 1. Package the application
-./mvnw package
+TOKEN=$(curl -sf -X POST "http://localhost:8180/realms/investimentos/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password&client_id=api-investimento&client_secret=api-secret&username=analista1&password=123456" \
+  | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
-# 2. Build and run with Docker Compose
-docker compose up --build
+curl -X POST http://localhost:8080/simular-investimento \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"clienteId": 100, "valor": 10000.00, "prazoMeses": 12, "tipoProduto": "CDB"}'
 ```
 
-The API will be available at http://localhost:8080 and Keycloak at http://localhost:8180.
+Resposta:
 
-### Authentication Flow For Evaluator
-
-This project runs with real authentication by default:
-
-- `docker-compose.yml` starts API + Keycloak
-- Keycloak issues JWT tokens with roles `usuario` and `analista`
-- API enforces endpoint access using `@RolesAllowed`
-
-1. Get token (usuario):
-
-```bash
-curl -X POST "http://localhost:8180/realms/investimentos/protocol/openid-connect/token" \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "client_id=api-investimento" \
-	-d "client_secret=api-secret" \
-	-d "grant_type=password" \
-	-d "username=usuario1" \
-	-d "password=123456"
+```json
+{
+  "success": true,
+  "data": {
+    "produtoValidado": {
+      "id": 101,
+      "nome": "CDB Caixa 2026",
+      "tipo": "CDB",
+      "rentabilidade": 0.12,
+      "risco": "Baixo"
+    },
+    "resultadoSimulacao": {
+      "valorFinal": 11268.25,
+      "rentabilidadeEfetiva": 0.126825,
+      "prazoMeses": 12
+    },
+    "dataSimulacao": "2026-04-14T17:49:59Z"
+  }
+}
 ```
 
-2. Get token (analista):
+---
 
-```bash
-curl -X POST "http://localhost:8180/realms/investimentos/protocol/openid-connect/token" \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "client_id=api-investimento" \
-	-d "client_secret=api-secret" \
-	-d "grant_type=password" \
-	-d "username=analista1" \
-	-d "password=123456"
+## Fórmula de Cálculo
+
+Juros compostos com rentabilidade anual convertida para mensal:
+
+```
+taxaMensal    = rentabilidadeAnual / 12
+valorFinal    = valorInicial × (1 + taxaMensal)^prazoMeses
+rentEfetiva   = (valorFinal / valorInicial) - 1
 ```
 
-3. Call API with bearer token:
+---
+
+## Motor de Recomendação (Perfil de Risco)
+
+O perfil é calculado com base no histórico de investimentos do cliente, somando três componentes (máx. 100 pontos):
+
+| Componente | Peso | Critério |
+|---|---|---|
+| Volume investido | 0–40 pts | < R$10k → 10 / até R$50k → 20 / até R$150k → 30 / acima → 40 |
+| Frequência | 0–30 pts | ≤ 2 registros → 8 / 3–6 → 15 / 7–12 → 24 / > 12 → 30 |
+| Preferência | 0–30 pts | Comparação entre `liquidezScore` e `rentabilidadeScore` dos produtos |
+
+| Pontuação | Perfil |
+|---|---|
+| < 40 | CONSERVADOR |
+| 40–69 | MODERADO |
+| ≥ 70 | AGRESSIVO |
+
+---
+
+## Testes
 
 ```bash
-curl -X GET "http://localhost:8080/telemetria" \
-	-H "Authorization: Bearer <ACCESS_TOKEN>"
-```
-
-Default test users in the imported realm:
-
-- `usuario1` / `123456` with role `usuario`
-- `analista1` / `123456` with role `analista`
-
-Quick validation script (expected behavior):
-
-1. `GET /perfil-risco/999` with token `usuario1` -> `200`
-2. `GET /telemetria` with token `usuario1` -> `403`
-3. `GET /telemetria` with token `analista1` -> `200`
-
-### Where Roles Are Defined
-
-- Token role extraction is configured in `src/main/resources/application.properties`:
-	- `quarkus.oidc.roles.role-claim-path=realm_access/roles`
-- This reads roles from Keycloak JWT claim `realm_access.roles` (e.g., `usuario`, `analista`).
-- Authorization is enforced in resource classes using `@RolesAllowed`.
-
-## REST Endpoints
-
-The challenge endpoints are being implemented in the next step based on `desafio.md`.
-
-## Running Tests
-
-```bash
+# Todos os testes (unit + integração)
 ./mvnw test
+
+# Cobertura JaCoCo (gerada em target/site/jacoco/index.html)
+./mvnw test jacoco:report
 ```
 
-## Database
+**75 testes** — unitários com Mockito e integração com `@QuarkusTest` + SQLite in-memory.
 
-SQLite is used as a file-based database. In Docker, this setup uses `jdbc:sqlite:/tmp/investimento.db` for simplicity in challenge execution.
+---
+
+## Estrutura do Projeto
+
+```
+src/
+├── main/java/com/investimento/
+│   ├── api/
+│   │   ├── dto/          # Records de request/response
+│   │   ├── exception/    # Mappers de exceção (404, 400, 500)
+│   │   ├── mapper/       # Conversores de entidade → DTO
+│   │   ├── resource/     # Controllers JAX-RS
+│   │   └── telemetria/   # Filtro de coleta de métricas
+│   ├── domain/
+│   │   ├── converter/    # LocalDate e OffsetDateTime ↔ String (SQLite)
+│   │   └── entity/       # Entidades JPA
+│   ├── repository/       # Repositórios Panache
+│   └── service/          # Interfaces e implementações de serviço
+└── main/resources/
+    ├── application.properties
+    └── db/migration/     # Flyway V1–V7
+```
+
+---
+
+## Banco de Dados
+
+SQLite com migrações Flyway. Em Docker, o banco fica em `/tmp/investimento.db` dentro do container.
+
+| Migration | Descrição |
+|---|---|
+| V1 | Schema inicial (produto, simulacao, historico, telemetria) |
+| V2 | FK produto em investimento_historico |
+| V3–V6 | Ajustes de sequência e índices |
+| V4 | Seed: produtos e histórico do cliente 999 (para testes) |
+| V7 | Coluna `data_simulacao_date` para agrupamento por dia |

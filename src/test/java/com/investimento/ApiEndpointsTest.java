@@ -109,4 +109,24 @@ class ApiEndpointsTest {
                 .body("data.periodo.inicio", notNullValue())
                 .body("data.periodo.fim", notNullValue());
     }
+
+    @Test
+    void shouldReturnInvestimentoHistoricoForExistingCliente() {
+        given()
+                .when().get("/investimentos/999")
+                .then()
+                .statusCode(200)
+                .body("success", org.hamcrest.Matchers.is(true))
+                .body("data", notNullValue());
+    }
+
+    @Test
+    void shouldReturnEmptyListForClienteWithNoHistorico() {
+        given()
+                .when().get("/investimentos/0")
+                .then()
+                .statusCode(200)
+                .body("success", org.hamcrest.Matchers.is(true))
+                .body("data", notNullValue());
+    }
 }

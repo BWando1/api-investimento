@@ -57,6 +57,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         simulacao.rentabilidadeEfetiva = calculo.rentabilidadeEfetiva();
         simulacao.prazoMeses = request.prazoMeses();
         simulacao.dataSimulacao = agora;
+        simulacao.dataSimulacaoDate = agora.toLocalDate();
 
         simulacaoPersistenceService.salvar(simulacao, produto.id);
 

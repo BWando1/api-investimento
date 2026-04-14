@@ -8,18 +8,18 @@ import java.util.List;
 
 @ApplicationScoped
 public class SimulacaoRepository implements PanacheRepository<Simulacao> {
-    
+
     public List<SimulacaoPorProdutoDiaResponse> listarAgregadoPorProdutoDia() {
         return getEntityManager()
                 .createQuery(
                         "SELECT new com.investimento.api.dto.SimulacaoPorProdutoDiaResponse(" +
                         "s.produtoNome, " +
-                        "CAST(s.dataSimulacao AS java.time.LocalDate), " +
+                        "s.dataSimulacaoDate, " +
                         "COUNT(s.id), " +
-                        "AVG(s.valorFinal)) " +
+                        "CAST(AVG(s.valorFinal) AS BigDecimal)) " +
                         "FROM Simulacao s " +
-                        "GROUP BY s.produtoNome, CAST(s.dataSimulacao AS java.time.LocalDate) " +
-                        "ORDER BY CAST(s.dataSimulacao AS java.time.LocalDate) DESC, s.produtoNome ASC",
+                        "GROUP BY s.produtoNome, s.dataSimulacaoDate " +
+                        "ORDER BY s.dataSimulacaoDate DESC, s.produtoNome ASC",
                         SimulacaoPorProdutoDiaResponse.class
                 )
                 .getResultList();
